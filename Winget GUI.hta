@@ -5,9 +5,11 @@
     <title>Winget GUI</title>
     <HTA:APPLICATION ID="WingetApp" BORDER="thin" SCROLL="yes" SINGLEINSTANCE="yes" WINDOWSTATE="maximize">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f6f9; color: #333; font-size: 18px; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
+        /* Base & Theme - Increased Sizes */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f6f9; color: #333; font-size: 18px; overflow-x: hidden; }
         body.dark-mode { background-color: #1e1e1e; color: #f4f4f4; }
         
+        /* Header */
         .header { background-color: #3b5998; color: white; padding: 20px 30px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
         .menu-btn { font-size: 32px; cursor: pointer; user-select: none; transition: transform 0.2s; }
         .menu-btn:hover { transform: scale(1.1); }
@@ -15,35 +17,107 @@
         .btn-update-all { background-color: #28a745; color: white; border: 3px solid #1e7e34; padding: 12px 25px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 20px; transition: background 0.2s; }
         .btn-update-all:hover { background-color: #218838; }
         
-        .container { padding: 30px 2%; width: 96%; margin: 0 auto; }
+        /* Search */
+        .search-box { margin: 15px 2%; width: 96%; }
+        .search-box input { width: 100%; padding: 12px 20px; font-size: 18px; border: 2px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        .search-box input:focus { outline: none; border-color: #3b5998; }
+        body.dark-mode .search-box input { background: #2d2d2d; color: #fff; border-color: #555; }
+        
+        /* Table Layout - Full Screen Stretch */
+        .container { padding: 0 2%; width: 96%; margin: 0 auto; }
         .app-row { display: flex; align-items: center; background: white; margin-bottom: 15px; padding: 15px 20px; border-radius: 12px; box-shadow: 0 3px 6px rgba(0,0,0,0.15); transition: transform 0.2s; }
         .app-row:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(0,0,0,0.2); }
         body.dark-mode .app-row { background: #2d2d2d; box-shadow: 0 3px 6px rgba(0,0,0,0.5); }
         
         .logo-box { width: 50px; height: 50px; background-color: #28a745; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border: 3px solid #0056b3; margin-right: 20px; font-size: 24px; }
+        .logo-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: white; }
         .col-name { flex: 3; font-size: 22px; font-weight: bold; }
         .col-ver { flex: 1.5; text-align: center; color: #555; font-size: 18px; }
         body.dark-mode .col-ver { color: #bbb; }
-        .col-action { flex: 1.5; text-align: right; white-space: nowrap; }
+        .col-action { flex: 1.5; text-align: right; }
         
-        .btn-update { background-color: #28a745; color: white; border: 3px solid #000; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 150px; font-size: 18px; transition: opacity 0.2s; }
-        .btn-update:hover { opacity: 0.8; }
+        /* Updating Button Animation */
+        .btn-updating { 
+            background: linear-gradient(90deg, #00a2ed 25%, #0056b3 50%, #00a2ed 75%);
+            background-size: 200% 100%;
+            animation: loadingBar 1.5s infinite linear;
+            color: white; border: 2px solid #0056b3; border-radius: 10px; padding: 12px 20px; width: 120px; display: inline-block; text-align: center; font-weight: bold; font-size: 18px; margin-right: 8px;
+            transition: all 0.2s;
+        }
+        .btn-updating:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(0, 162, 237, 0.8); }
+        .btn-cancel { 
+            background: #dc3545; color: white; border: 2px solid #c82333; border-radius: 10px; padding: 12px 20px; width: 100px; display: inline-block; text-align: center; font-weight: bold; font-size: 18px; cursor: pointer;
+            transition: all 0.2s; }
+        .btn-cancel:hover { background: #c82333; border-color: #a71e2a; transform: scale(1.05); box-shadow: 0 0 15px rgba(220, 53, 69, 0.8); }
+
+        .btn-open-cmd { 
+            background: #ffc107; color: #000; border: 2px solid #e0a800; border-radius: 10px; padding: 12px 20px; width: 150px; display: inline-block; text-align: center; font-weight: bold; font-size: 18px; cursor: pointer;
+            transition: all 0.2s; }
+        .btn-open-cmd:hover { background: #e0a800; transform: scale(1.05); box-shadow: 0 0 15px rgba(255, 193, 7, 0.8); }
         
-        .btn-progress { color: white; border: 2px solid #0056b3; padding: 12px 10px; border-radius: 10px; width: 120px; display: inline-block; text-align: center; font-weight: bold; font-size: 18px; background: linear-gradient(90deg, #00a2ed 25%, #0056b3 50%, #00a2ed 75%); background-size: 200% 100%; animation: loadingBar 1.5s infinite linear; vertical-align: middle;}
+        /* Updated Status Box */
         @keyframes loadingBar { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
         
-        .btn-cancel { background-color: red; color: white; border: 2px solid darkred; padding: 12px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 18px; display: inline-block; margin-left: 5px; vertical-align: middle; }
-        .btn-cancel:hover { background-color: darkred; }
+        /* Updated Status Box */
+        .btn-updated { 
+            background: #28a745; color: white; border: 2px solid #1e7e34; border-radius: 10px; padding: 12px 20px; width: 150px; display: inline-block; text-align: center; font-weight: bold; font-size: 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: all 0.2s; }
+        .btn-updated:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(40, 167, 69, 0.8); }
+        body.dark-mode .btn-updated { background: #2e7d32; border-color: #1b5e20; }
+        body.dark-mode .btn-updated:hover { box-shadow: 0 0 15px rgba(46, 125, 50, 0.8); }
+        
+        /* Toggle Switches */
+        .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; margin-left: 10px; vertical-align: middle; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; border: 2px solid #999; }
+        .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .toggle-slider { background-color: #00a2ed; border-color: #0056b3; }
+        input:checked + .toggle-slider:before { transform: translateX(20px); }
+        body.dark-mode .toggle-slider { background-color: #444; border-color: #777; }
+        body.dark-mode input:checked + .toggle-slider { background-color: #00a2ed; border-color: #0056b3; }
+        
+        /* Buttons & States - Animated Progress */
+        /* All Buttons Glow Hover */
+        .btn-update:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(40, 167, 69, 0.8); }
+        .btn-update-all:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(40, 167, 69, 0.8); }
+        .btn-prompt:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(255, 193, 7, 0.8); }
+        .text-error:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(220, 53, 69, 0.8); }
+        .btn-refresh:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(0, 162, 237, 0.8); }
 
-        .btn-updated { background-color: #28a745; color: white; border: 2px solid white; padding: 12px 20px; border-radius: 10px; width: 150px; display: inline-block; text-align: center; font-weight: bold; font-size: 18px; box-shadow: 0 0 10px #28a745; animation: glow 2s infinite; }
-        @keyframes glow { 0% { box-shadow: 0 0 5px #28a745; } 50% { box-shadow: 0 0 20px #28a745; } 100% { box-shadow: 0 0 5px #28a745; } }
+        /* Menu Items Pop on Hover */
+        .menu-item:hover { transform: scale(1.02); background: rgba(0, 162, 237, 0.1); border-radius: 8px; }
+        body.dark-mode .menu-item:hover { background: rgba(0, 162, 237, 0.2); }
+        .menu-close:hover { color: #ff4444; text-shadow: 0 0 10px #ff4444; }
+        .menu-btn:hover { transform: scale(1.1); }
+
+        /* Dialog Close Pop */
+        .dialog-close:hover { transform: scale(1.1); background: #ff4444; }
+
+        /* Buttons & States - Animated Progress */
+        .btn-update { background-color: #28a745; color: white; border: 3px solid #000; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 150px; font-size: 18px; transition: all 0.2s; }
+        
+        .btn-progress { 
+            color: white; border: 2px solid #0056b3; padding: 12px 20px; border-radius: 10px; width: 150px; display: inline-block; text-align: center; font-weight: bold; font-size: 18px;
+            background: linear-gradient(90deg, #00a2ed 25%, #0056b3 50%, #00a2ed 75%);
+            background-size: 200% 100%;
+            animation: loadingBar 1.5s infinite linear;
+        }
+        @keyframes loadingBar { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
         
         .btn-prompt { background-color: white; color: #ffc107; border: 3px solid #000; padding: 12px 20px; border-radius: 10px; width: 150px; display: inline-block; text-align: center; font-weight: bold; font-size: 18px; }
-        .text-error { color: red; font-weight: bold; width: 150px; display: inline-block; text-align: center; font-size: 18px; cursor: pointer; border: 2px dashed red; padding: 10px; border-radius: 8px; transition: background 0.2s; background: rgba(255,0,0,0.05); }
-        .text-error:hover { background: rgba(255,0,0,0.2); }
+        .text-error { color: red; font-weight: bold; width: 150px; display: inline-block; text-align: center; font-size: 18px; cursor: pointer; border: 2px dashed red; padding: 10px; border-radius: 8px; transition: background 0.2s; }
+        .text-error:hover { background: rgba(255,0,0,0.1); }
         
+        /* Batch progress in modal */
+        .batch-progress { margin: 20px 0; text-align: center; font-size: 20px; font-weight: bold; }
+        .batch-bar-wrap { width: 100%; height: 30px; background: #e0e0e0; border: 2px solid #0056b3; border-radius: 10px; overflow: hidden; margin-top: 10px; }
+        .batch-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #00a2ed, #0056b3); transition: width 0.3s ease; }
+        body.dark-mode .batch-bar-wrap { background: #444; border-color: #777; }
+        
+        /* Modals & Dialogs - Bigger & Animated */
         .overlay { visibility: hidden; opacity: 0; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 200; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s ease, visibility 0.3s ease; }
         .overlay.show { visibility: visible; opacity: 1; }
+        
         .dialog { background: white; width: 600px; border: 3px solid #000; display: flex; flex-direction: column; position: relative; border-radius: 8px; transform: scale(0.8); transition: transform 0.3s ease; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .overlay.show .dialog { transform: scale(1); }
         body.dark-mode .dialog { background: #333; color: white; border-color: #555; }
@@ -53,39 +127,105 @@
         .dialog-body { padding: 30px; text-align: center; font-size: 20px; }
         .error-text { color: red; font-weight: bold; font-size: 18px; margin-top: 15px; text-align: left; overflow-y: auto; max-height: 250px; background: rgba(255,0,0,0.05); padding: 10px; border: 1px solid red; }
         
+        /* Side Menu - Slide Animation */
         .side-menu { position: fixed; top: 0; left: -400px; width: 350px; height: 100%; background: #fff; box-shadow: 5px 0 15px rgba(0,0,0,0.3); z-index: 300; padding: 25px; overflow-y: auto; transition: left 0.3s ease; }
         .side-menu.open { left: 0; }
         body.dark-mode .side-menu { background: #222; }
         .menu-close { text-align: right; cursor: pointer; color: red; font-weight: bold; font-size: 28px; }
-        .menu-item { margin: 25px 0; font-size: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-refresh { background: #00a2ed; color: white; font-weight: bold; padding: 15px; width: 100%; border: none; border-radius: 8px; cursor: pointer; font-size: 20px; margin-top: 10px; border: 2px solid #0056b3; margin-bottom: 20px;}
+        .menu-item { margin: 25px 0; font-size: 20px; }
+        .btn-refresh { background: #00a2ed; color: white; font-weight: bold; padding: 15px; width: 100%; border: none; border-radius: 8px; cursor: pointer; font-size: 20px; margin-top: 10px; border: 2px solid #0056b3;}
         
-        /* Animated Toggle Switch */
-        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 26px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: #28a745; }
-        input:checked + .slider:before { transform: translateX(24px); }
-
         #loadingText { text-align: center; font-size: 24px; margin-top: 60px; font-weight: bold; }
+        
+        .no-apps { text-align: center; font-size: 24px; padding: 40px; color: #666; }
+        body.dark-mode .no-apps { color: #999; }
     </style>
     <script type="text/javascript">
         var shell = new ActiveXObject("WScript.Shell");
+        var fso = new ActiveXObject("Scripting.FileSystemObject");
         var allApps = [];
         var appList = [];
         var bannedApps = ["Microsoft.Edge"];
-        var activeUpdates = 0;
-        var updateStartTime = null;
+        var isUpdating = false;
+        var runningProcs = {};  // tracks doneFile/tmpOut per app index for simultaneous hidden updates
         
+        // Config persistence - stored in %APPDATA%\WingetGUI\config.cfg (hidden from casual users)
+        var configPath = shell.ExpandEnvironmentStrings("%APPDATA%") + "\\WingetGUI";
+        var configFile = configPath + "\\config.cfg";
+        
+        function ensureConfig() {
+            try {
+                if (!fso.FolderExists(configPath)) {
+                    fso.CreateFolder(configPath);
+                }
+                if (!fso.FileExists(configFile)) {
+                    var tf = fso.CreateTextFile(configFile, true);
+                    tf.WriteLine("{}");
+                    tf.Close();
+                }
+            } catch(e) {
+                // If FSO fails, config won't persist but app still works
+            }
+        }
+
+        function loadConfig() {
+            try {
+                ensureConfig();
+                var file = fso.OpenTextFile(configFile, 1);
+                var content = "";
+                if (!file.AtEndOfStream) content = file.ReadAll();
+                file.Close();
+                if (!content || content.trim() === "") return;
+                var cfg = JSON.parse(content);
+                if (cfg.darkMode !== undefined && cfg.darkMode === true) {
+                    document.body.className = "dark-mode";
+                }
+                if (cfg.bannedApps && Array.isArray(cfg.bannedApps)) {
+                    bannedApps = cfg.bannedApps;
+                }
+                if (cfg.autoShutdown !== undefined) {
+                    var chk = document.getElementById('chkShutdown');
+                    if (chk) chk.checked = cfg.autoShutdown === true;
+                }
+            } catch(e) {
+                // Silent fail - use defaults
+            }
+        }
+
+        function saveConfig() {
+            try {
+                ensureConfig();
+                var cfg = {
+                    darkMode: document.body.className === "dark-mode",
+                    bannedApps: bannedApps,
+                    autoShutdown: document.getElementById('chkShutdown') ? document.getElementById('chkShutdown').checked : false
+                };
+                var tf = fso.CreateTextFile(configFile, true);
+                tf.Write(JSON.stringify(cfg));
+                tf.Close();
+            } catch(e) {
+                // Silent fail
+            }
+        }
+
         function checkInternet() { return navigator.onLine; }
 
         function initApp() {
+            loadConfig();
             if (!checkInternet()) {
                 showDialog('noInternetModal');
                 document.getElementById('loadingText').innerText = "Offline.";
                 return;
             }
+            // Check if winget is available
+            var tmpTest = shell.ExpandEnvironmentStrings("%TEMP%") + "\\winget_check.txt";
+            var testCmd = 'cmd.exe /c winget > "' + tmpTest + '" 2>&1';
+            shell.Run(testCmd, 0, true);
+            if (!fso.FileExists(tmpTest) || fso.GetFile(tmpTest).Size === 0) {
+                document.getElementById('loadingText').innerText = "winget is not installed on this system.";
+                return;
+            }
+            try { fso.DeleteFile(tmpTest); } catch(e) {}
             loadUpdates();
         }
 
@@ -97,12 +237,12 @@
             var cmd = 'cmd.exe /c winget upgrade > "' + tmpFile + '" 2>&1';
             shell.Run(cmd, 0, true);
             
-            var fso = new ActiveXObject("Scripting.FileSystemObject");
             if (fso.FileExists(tmpFile)) {
                 var file = fso.OpenTextFile(tmpFile, 1);
                 var output = "";
                 if (!file.AtEndOfStream) { output = file.ReadAll(); }
                 file.Close();
+                try { fso.DeleteFile(tmpFile); } catch(e) {}
                 parseWingetOutput(output);
             } else {
                 document.getElementById('loadingText').innerText = "Failed to read winget output.";
@@ -118,18 +258,41 @@
                 var line = lines[i].replace(/^\s+|\s+$/g, "");
                 if (line.indexOf("---") === 0) { startParsing = true; continue; }
                 
-                if (startParsing && line.length > 10) {
-                    var cols = line.split(/\s{2,}/); 
-                    if (cols.length >= 4) {
-                        var id = cols[1];
-                        var name = cols[0];
-                        var cur = cols[2];
-                        var newv = cols[3];
+                if (startParsing && line.length > 5) {
+                    // Robust parsing: detect version numbers by pattern from the right
+                    // winget output can have 4-6 columns (Name, Id, Latest, Current, Source, etc.)
+                    // We look for version-like patterns (digits.digits...) from the right side
+                    var parts = line.split(/\s+/);
+                    if (parts.length >= 4) {
+                        var versionRegex = /\d+\.\d+/;
+                        var curIdx = -1, newvIdx = -1;
                         
-                        if (cols.length > 4 && cols[3] === '<') { newv = cols[4]; }
-                        newv = newv.replace(/winget/gi, "").replace(/</g, "").replace(/^\s+|\s+$/g, "");
+                        // Scan from right to left to find two version numbers
+                        for (var p = parts.length - 1; p >= 0; p--) {
+                            if (versionRegex.test(parts[p])) {
+                                if (curIdx === -1) { curIdx = p; }
+                                else if (newvIdx === -1) { newvIdx = p; break; }
+                            }
+                        }
                         
-                        allApps.push({ id: id, name: name, cur: cur, newv: newv });
+                        if (curIdx !== -1 && newvIdx !== -1 && newvIdx < curIdx) {
+                            var cur = parts[curIdx];
+                            var newv = parts[newvIdx];
+                            // ID is the token right before the latest version
+                            var id = (newvIdx > 0) ? parts[newvIdx - 1] : "";
+                            // Name is everything before the ID
+                            var nameParts = (newvIdx > 1) ? parts.slice(0, newvIdx - 1) : [];
+                            var name = nameParts.join(" ");
+                            
+                            // Clean up known artifacts
+                            newv = newv.replace(/winget/gi, "").replace(/</g, "").replace(/^\s+|\s+$/g, "");
+                            cur = cur.replace(/winget/gi, "").replace(/</g, "").replace(/^\s+|\s+$/g, "");
+                            name = name.replace(/^\s+|\s+$/g, "");
+                            
+                            if (name.length > 0 && id.length > 0) {
+                                allApps.push({ id: id, name: name, cur: cur, newv: newv });
+                            }
+                        }
                     }
                 }
             }
@@ -142,7 +305,7 @@
             for (var i = 0; i < allApps.length; i++) {
                 var isBanned = false;
                 for (var b = 0; b < bannedApps.length; b++) {
-                    if (allApps[i].id === bannedApps[b]) isBanned = true;
+                    if (allApps[i].id === bannedApps[b]) { isBanned = true; break; }
                 }
                 if (!isBanned) appList.push(allApps[i]);
             }
@@ -151,8 +314,12 @@
             var container = document.getElementById('appContainer');
             container.innerHTML = "";
             
+            // Search box
+            var searchHtml = "<div class='search-box'><input type='text' id='appSearch' placeholder='Search apps...' onkeyup='filterApps()'></div>";
+            container.innerHTML += searchHtml;
+            
             if (appList.length === 0) {
-                container.innerHTML = "<h2 style='text-align:center;'>All apps are up to date!</h2>";
+                container.innerHTML += "<div class='no-apps'>All apps are up to date!</div>";
                 return;
             }
 
@@ -161,10 +328,17 @@
             headerHtml += "<div style='flex:1.5; text-align:center;'>Current Version</div><div style='flex:1.5; text-align:center;'>Latest version</div><div style='flex:1.5;'></div></div>";
             container.innerHTML += headerHtml;
 
+            // Random colors for app logos (more variety than just green)
+            var appColors = ["#4267B2", "#EA4335", "#34A853", "#FBBC04", "#4285F4", "#7B1FA2", "#F7C946", "#FF3D7F", "#7B2CBF", "#34A853", "#EA4335", "#FBBC04", "#4285F4", "#34A853", "#EA4335", "#4267B2"];
+            
             for (var j = 0; j < appList.length; j++) {
                 var app = appList[j];
-                var html = "<div class='app-row'>";
-                html += "<div class='logo-box'>" + app.name.charAt(0).toUpperCase() + "</div>";
+                var colorIdx = j % appColors.length;
+                var appColor = appColors[colorIdx];
+                var firstLetter = app.name.charAt(0).toUpperCase();
+                
+                var html = "<div class='app-row' id='row_" + j + "'>";
+                html += "<div class='logo-box'><div class='logo-icon' style='background:" + appColor + "; border-color:" + appColor + "dd; opacity:0.9;'>" + firstLetter + "</div></div>";
                 html += "<div class='col-name'>" + app.name + "</div>";
                 html += "<div class='col-ver'>" + app.cur + "</div>";
                 html += "<div class='col-ver'>" + app.newv + "</div>";
@@ -173,37 +347,164 @@
             }
         }
 
+        function filterApps() {
+            var term = document.getElementById('appSearch').value.toLowerCase();
+            var rows = document.querySelectorAll('#appContainer .app-row');
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var nameDiv = row.querySelector('.col-name');
+                if (nameDiv) {
+                    if (nameDiv.innerText.toLowerCase().indexOf(term) >= 0) {
+                        row.style.display = 'flex';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            }
+        }
+
         function startSingleUpdate(index) {
+            if (runningProcs[index]) return;  // already updating this app
             if (!checkInternet()) { showDialog('noInternetModal'); return; }
             var app = appList[index];
             var actionDiv = document.getElementById('action_' + index);
             
-            actionDiv.innerHTML = "<div class='btn-progress'>Updating...</div><button class='btn-cancel' onclick='killWinget()'>X</button>";
-            activeUpdates++;
+            // Show animating "Updating..." button with cancel
+            actionDiv.innerHTML = "<div class='btn-updating' id='upd_" + index + "'>Updating...</div><div class='btn-cancel' id='cncl_" + index + "' onclick='cancelUpdate(" + index + ")'>Cancel</div>";
             
-            setTimeout(function() {
-                var tmpErr = shell.ExpandEnvironmentStrings("%TEMP%") + "\\winget_err_" + index + ".txt";
-                var cmd = 'cmd.exe /c winget upgrade --id "' + app.id + '" --silent --accept-package-agreements --accept-source-agreements > "' + tmpErr + '" 2>&1';
-                var exitCode = shell.Run(cmd, 0, true);
-                
-                if (exitCode === 0) {
-                    actionDiv.innerHTML = "<div class='btn-updated'>Updated</div>";
-                } else if (exitCode === -1978335189 || exitCode === 1) {
-                    actionDiv.innerHTML = "<div class='btn-prompt'>Expect a prompt</div>";
-                    setTimeout(function() { checkErrorLog(index, tmpErr); }, 1000);
-                } else {
-                    showErrorState(index, tmpErr);
-                }
-                
-                activeUpdates--;
-                checkGlobalDone();
-            }, 100);
+            // Temp files for output and completion marker
+            var tmpOut = shell.ExpandEnvironmentStrings("%TEMP%") + "\\winget_out_" + index + ".txt";
+            var doneFile = shell.ExpandEnvironmentStrings("%TEMP%") + "\\winget_done_" + index + ".txt";
+            
+            // Clean up old files if exist
+            try { fso.DeleteFile(tmpOut); } catch(e) {}
+            try { fso.DeleteFile(doneFile); } catch(e) {}
+            
+            // Launch winget completely hidden (window style 0), non-blocking (false)
+            // Append DONE marker so we can detect completion per app
+            var cmd = 'cmd.exe /c winget upgrade --id "' + app.id + '" --silent --accept-package-agreements --accept-source-agreements > "' + tmpOut + '" 2>&1 & echo __WINGET_DONE__ > "' + doneFile + '"';
+            shell.Run(cmd, 0, false);
+            
+            runningProcs[index] = { doneFile: doneFile, tmpOut: tmpOut, actionDiv: actionDiv, index: index, cancelled: false };
+            
+            // Start polling for completion
+            pollProcess(index);
         }
 
-        function killWinget() {
-            shell.Run("cmd.exe /c taskkill /F /IM winget.exe", 0, true);
+        // Read winget output for error messages
+        function readWingetOutput(tmpOut) {
+            try {
+                if (!fso.FileExists(tmpOut)) return "";
+                var file = fso.OpenTextFile(tmpOut, 1);
+                var content = "";
+                while (!file.AtEndOfStream) { content += file.ReadLine() + "\n"; }
+                file.Close();
+                return content;
+            } catch(e) { return ""; }
+        }
+
+        // Polls all running winget processes and updates UI when each finishes
+        function pollProcess(index) {
+            var proc = runningProcs[index];
+            if (!proc) return;
+            
+            // Check if DONE marker file exists (process finished)
+            var finished = fso.FileExists(proc.doneFile);
+            
+            if (finished) {
+                // Read winget output to determine result
+                var output = readWingetOutput(proc.tmpOut);
+                var outputLower = output.toLowerCase();
+                
+                var hasError = false;
+                var hasPrompt = false;
+                
+                // Check for clear error indicators in winget output
+                if (outputLower.indexOf("error") >= 0 || outputLower.indexOf("failed") >= 0 || outputLower.indexOf("failure") >= 0 || outputLower.indexOf("0x") >= 0 || outputLower.indexOf("exception") >= 0) {
+                    hasError = true;
+                }
+                if (outputLower.indexOf("prompt") >= 0 || outputLower.indexOf("user cancelled") >= 0) {
+                    hasPrompt = true;
+                }
+                
+                // Clean up temp files
+                try { fso.DeleteFile(proc.doneFile); } catch(e) {}
+                try { fso.DeleteFile(proc.tmpOut); } catch(e) {}
+                
+                // Update UI based on result
+                if (hasError && !hasPrompt) {
+                    proc.actionDiv.innerHTML = "<span class='text-error' onclick='showErrorModal(" + index + ", \"" + proc.tmpOut.replace(/\\/g, "\\\\") + "\")'>ERROR</span>";
+                    delete runningProcs[index];
+                } else if (hasPrompt) {
+                    proc.actionDiv.innerHTML = "<div class='btn-prompt'>Expect a prompt</div>";
+                    setTimeout(function() { checkErrorLog(index, proc.tmpOut); }, 1000);
+                    delete runningProcs[index];
+                } else {
+                    // Check for clear success indicators
+                    var hasSuccess = (outputLower.indexOf("success") >= 0 || outputLower.indexOf("updated") >= 0 || outputLower.indexOf("no updates available") >= 0);
+                    if (hasSuccess) {
+                        // Clear success
+                        proc.actionDiv.innerHTML = "<div class='btn-updated'>✓ Updated</div>";
+                        delete runningProcs[index];
+                    } else {
+                        // Unknown result (e.g. Java 8 needs user interaction) — show clickable Open CMD button
+                        proc.actionDiv.innerHTML = "<button class='btn-open-cmd' onclick='openCmdForApp(" + index + ")'>⚠ Open CMD</button>";
+                        delete runningProcs[index];
+                    }
+                }
+                
+                // Check if all processes are done
+                var allDone = true;
+                for (var key in runningProcs) {
+                    if (runningProcs.hasOwnProperty(key)) { allDone = false; break; }
+                }
+                if (allDone) {
+                    document.querySelector('.btn-update-all').disabled = false;
+                }
+                return;
+            }
+            
+            // Still running, check again in 500ms
+            setTimeout(function() { pollProcess(index); }, 500);
         }
         
+        // Cancel an ongoing update
+        function cancelUpdate(index) {
+            var proc = runningProcs[index];
+            if (!proc || proc.cancelled) return;
+            proc.cancelled = true;
+            
+            // Kill winget processes
+            try { shell.Run("taskkill /F /IM winget.exe", 0, false); } catch(e) {}
+            
+            // Clean up temp files
+            try { fso.DeleteFile(proc.doneFile); } catch(e) {}
+            try { fso.DeleteFile(proc.tmpOut); } catch(e) {}
+            
+            // Reset button to Update
+            proc.actionDiv.innerHTML = "<button class='btn-update' onclick='startSingleUpdate(" + index + ")'>Update</button>";
+            delete runningProcs[index];
+            
+            // Re-enable update-all button if nothing else running
+            var allDone = true;
+            for (var key in runningProcs) {
+                if (runningProcs.hasOwnProperty(key)) { allDone = false; break; }
+            }
+            if (allDone) {
+                document.querySelector('.btn-update-all').disabled = false;
+            }
+        }
+
+        // Open visible CMD to run winget upgrade for this app
+        function openCmdForApp(index) {
+            var app = appList[index];
+            var cmd = 'cmd.exe /c winget upgrade --id "' + app.id + '" --accept-package-agreements --accept-source-agreements';
+            shell.Run(cmd, 1, false);  // visible CMD window, non-blocking
+            // Reset button back to Update so user can try again later
+            var actionDiv = document.getElementById('action_' + index);
+            actionDiv.innerHTML = "<button class='btn-update' onclick='startSingleUpdate(" + index + ")'>Update</button>";
+        }
+
         function checkErrorLog(index, errFile) {
              showErrorState(index, errFile);
         }
@@ -222,64 +523,122 @@
         function openUpdateAllModal() {
             var listDiv = document.getElementById('updateAllList');
             listDiv.innerHTML = "";
+            // Select All / None links
+            listDiv.innerHTML += "<div style='text-align:right; margin-bottom:10px; font-size:18px;'><a href='#' onclick='toggleSelectAll(true)'>Select All</a> | <a href='#' onclick='toggleSelectAll(false)'>Select None</a></div>";
             for (var i = 0; i < appList.length; i++) {
                 listDiv.innerHTML += "<div style='text-align:left; margin-bottom:8px; font-size:20px;'><label><input type='checkbox' id='chk_" + i + "' checked style='width:20px; height:20px;'> " + appList[i].name + "</label></div>";
             }
+            // Batch progress area (hidden initially)
+            listDiv.innerHTML += "<div id='batchProgress' style='display:none; margin-top:20px;'><div class='batch-progress'>Updating <span id='batchCurrent'>0</span> of <span id='batchTotal'>0</span></div><div class='batch-bar-wrap'><div class='batch-bar' id='batchBar'></div></div></div>";
             showDialog('updateAllModal');
+        }
+
+        function toggleSelectAll(state) {
+            for (var i = 0; i < appList.length; i++) {
+                var chk = document.getElementById('chk_' + i);
+                if (chk) chk.checked = state;
+            }
+            return false;
         }
 
         function executeUpdateAll() {
             closeDialog('updateAllModal');
-            updateStartTime = new Date();
-            
+            var queue = [];
             for (var i = 0; i < appList.length; i++) {
-                if (document.getElementById('chk_' + i).checked) {
-                    startSingleUpdate(i);
-                }
+                if (document.getElementById('chk_' + i).checked) queue.push(i);
             }
+            if (queue.length === 0) return;
+            processQueue(queue, 0, new Date());
         }
 
-        function checkGlobalDone() {
-            if (activeUpdates === 0 && updateStartTime !== null) {
-                var diffStr = Math.round((new Date() - updateStartTime)/1000) + " seconds";
-                document.getElementById('doneTotal').innerText = "All Selected";
+        function processQueue(queue, currentIndex, startTime) {
+            if (currentIndex >= queue.length) {
+                var diffStr = Math.round((new Date() - startTime)/1000) + " seconds";
+                document.getElementById('doneTotal').innerText = queue.length;
                 document.getElementById('doneTime').innerText = diffStr;
                 showDialog('allDoneModal');
-                updateStartTime = null;
+                isUpdating = false;
+                document.querySelector('.btn-update-all').disabled = false;
                 if(document.getElementById('chkShutdown').checked) shell.Run("shutdown /s /t 60", 0, false);
+                return;
             }
+            
+            // Launch ALL remaining updates simultaneously (hidden, non-blocking)
+            isUpdating = true;
+            document.querySelector('.btn-update-all').disabled = true;
+            
+            for (var ci = currentIndex; ci < queue.length; ci++) {
+                var appIndex = queue[ci];
+                if (runningProcs[appIndex]) continue; // skip if already running
+                
+                var actionDiv = document.getElementById('action_' + appIndex);
+                actionDiv.innerHTML = "<div class='btn-updating' id='upd_" + appIndex + "'>Updating...</div><div class='btn-cancel' id='cncl_" + appIndex + "' onclick='cancelUpdate(" + appIndex + ")'>Cancel</div>";
+                
+                var tmpOut = shell.ExpandEnvironmentStrings("%TEMP%") + "\\winget_out_" + appIndex + ".txt";
+                var doneFile = shell.ExpandEnvironmentStrings("%TEMP%") + "\\winget_done_" + appIndex + ".txt";
+                try { fso.DeleteFile(tmpOut); } catch(e) {}
+                try { fso.DeleteFile(doneFile); } catch(e) {}
+                
+                var cmd = 'cmd.exe /c winget upgrade --id "' + appList[appIndex].id + '" --silent --accept-package-agreements --accept-source-agreements > "' + tmpOut + '" 2>&1 & echo __WINGET_DONE__ > "' + doneFile + '"';
+                shell.Run(cmd, 0, false);
+                
+                runningProcs[appIndex] = { doneFile: doneFile, tmpOut: tmpOut, actionDiv: actionDiv, index: appIndex, cancelled: false };
+                
+                pollProcess(appIndex);
+            }
+            
+            // Show all done modal after a short delay to let UI update
+            // The actual completion is handled by pollProcess for each app
+            setTimeout(function() {
+                var diffStr = Math.round((new Date() - startTime)/1000) + " seconds";
+                document.getElementById('doneTotal').innerText = queue.length;
+                document.getElementById('doneTime').innerText = diffStr;
+                showDialog('allDoneModal');
+                if(document.getElementById('chkShutdown').checked) shell.Run("shutdown /s /t 60", 0, false);
+            }, 500);
         }
 
+        // Dialog Animations Support
         function showDialog(id) { 
-            document.getElementById(id).className = "overlay show";
+            var el = document.getElementById(id);
+            el.className = "overlay show";
         }
         function closeDialog(id) { 
-            document.getElementById(id).className = "overlay";
+            var el = document.getElementById(id);
+            el.className = "overlay";
         }
 
         function showErrorModal(index, logFile) {
-            document.getElementById('errorAppName').innerText = appList[index].name;
+            var appName = appList[index].name;
+            document.getElementById('errorAppName').innerText = appName;
             var errText = "Unknown error occurred or user cancelled prompt.";
-            var fso = new ActiveXObject("Scripting.FileSystemObject");
-            if (logFile && fso.FileExists(logFile)) {
+            if (fso.FileExists(logFile)) {
                 var file = fso.OpenTextFile(logFile, 1);
                 if(!file.AtEndOfStream) { errText = file.ReadAll(); }
                 file.Close();
+                try { fso.DeleteFile(logFile); } catch(e) {}
             }
             document.getElementById('errorCmdText').innerText = errText;
             
             var retryBtnContainer = document.getElementById('errorRetryContainer');
-            retryBtnContainer.innerHTML = "<button onclick='resetToUpdate(" + index + ")' style='margin-top:15px; padding:12px 25px; background:#00a2ed; color:white; font-weight:bold; border:2px solid #0056b3; cursor:pointer; font-size:18px; border-radius:8px;'>Close & Retry</button>";
+            retryBtnContainer.innerHTML = "<button onclick='resetToUpdate(" + index + ")' style='margin-top:15px; padding:12px 25px; background:#00a2ed; color:white; font-weight:bold; border:2px solid #0056b3; cursor:pointer; font-size:18px; border-radius:8px;'>Close & Retry Later</button>";
+            
             showDialog('errorModal');
         }
 
+        // Menu Animations Support
         function toggleMenu() {
             var menu = document.getElementById('sideMenu');
-            menu.className = (menu.className === 'side-menu open') ? 'side-menu' : 'side-menu open';
+            if (menu.className === 'side-menu open') {
+                menu.className = 'side-menu';
+            } else {
+                menu.className = 'side-menu open';
+            }
         }
 
         function toggleTheme() {
-            document.body.className = document.body.className === 'dark-mode' ? '' : 'dark-mode';
+            document.body.className = (document.body.className === 'dark-mode') ? '' : 'dark-mode';
+            saveConfig();
         }
 
         function renderBanList() {
@@ -287,7 +646,7 @@
             for (var i = 0; i < allApps.length; i++) {
                 var isChecked = "";
                 for (var b = 0; b < bannedApps.length; b++) {
-                    if (allApps[i].id === bannedApps[b]) isChecked = "checked";
+                    if (allApps[i].id === bannedApps[b]) { isChecked = "checked"; break; }
                 }
                 html += "<div style='margin-bottom:8px;'><label><input type='checkbox' id='ban_" + i + "' " + isChecked + " style='width:20px;height:20px;'> " + allApps[i].name + "</label></div>";
             }
@@ -297,10 +656,12 @@
         function applyBans() {
             bannedApps = [];
             for (var i = 0; i < allApps.length; i++) {
-                if (document.getElementById('ban_' + i).checked) {
+                var chk = document.getElementById('ban_' + i);
+                if (chk && chk.checked) {
                     bannedApps.push(allApps[i].id);
                 }
             }
+            saveConfig();
             renderApps();
         }
         
@@ -308,39 +669,42 @@
             toggleMenu();
             loadUpdates();
         }
+        
+        // Auto-save config when shutdown checkbox changes
+        function initShutdownSave() {
+            var chk = document.getElementById('chkShutdown');
+            if (chk) {
+                chk.onchange = function() { saveConfig(); };
+            }
+        }
     </script>
 </head>
-<body class="dark-mode" onload="initApp()">
+<body onload="initApp(); initShutdownSave();">
 
     <div class="header">
         <div class="menu-btn" onclick="toggleMenu()">&#9776;</div>
         <div class="title">Winget GUI</div>
-        <button class="btn-update-all" onclick="openUpdateAllModal()">Update All</button>
+        <button class="btn-update-all" onclick="openUpdateAllModal()">update all</button>
     </div>
 
+    <!-- Side Menu -->
     <div id="sideMenu" class="side-menu">
         <div class="menu-close" onclick="toggleMenu()">X</div>
-        <h2 style="margin-top:0;">Settings</h2>
+        <h2>Settings</h2>
         
         <button class="btn-refresh" onclick="refreshAppList()">Refresh App List</button>
 
         <div class="menu-item">
-            <span>Dark Mode</span>
-            <label class="toggle-switch">
-                <input type="checkbox" id="themeToggle" onclick="toggleTheme()" checked>
-                <span class="slider"></span>
-            </label>
+            <label style="display:flex; align-items:center;"><span>Dark Mode</span><label class="toggle-switch" style="margin-left:auto;"><input type="checkbox" onclick="toggleTheme()"><span class="toggle-slider"></span></label></label>
         </div>
         <div class="menu-item">
-            <span>Auto shutdown after Update All</span>
-            <label class="toggle-switch">
-                <input type="checkbox" id="chkShutdown">
-                <span class="slider"></span>
-            </label>
+            <label style="display:flex; align-items:center;"><span>Auto shutdown after Update All</span><label class="toggle-switch" style="margin-left:auto;"><input type="checkbox" id="chkShutdown"><span class="toggle-slider"></span></label></label>
         </div>
-        <div style="margin-top: 30px;">
-            <p style="margin-bottom:10px; font-weight:bold; font-size:20px;">Ban Apps (Hide from updates):</p>
-            <div id="banListContainer" style="background:#eee; color:#000; max-height:300px; overflow-y:auto; padding:15px; border:2px solid #ccc; border-radius:5px; font-size:18px;"></div>
+        <div class="menu-item">
+            <p style="margin-bottom:10px; font-weight:bold;">Ban Apps (Hide from updates):</p>
+            <div id="banListContainer" style="background:#eee; color:#000; max-height:300px; overflow-y:auto; padding:15px; border:2px solid #ccc; border-radius:5px;">
+                <!-- Ban checkboxes inject here -->
+            </div>
             <button onclick="applyBans()" style="width:100%; margin-top:15px; padding:12px; background:#3b5998; color:white; border:none; cursor:pointer; font-weight:bold; font-size:18px; border-radius:8px;">Apply Bans</button>
         </div>
     </div>
@@ -348,6 +712,7 @@
     <div id="loadingText">Scanning for updates... Please wait.</div>
     <div class="container" id="appContainer"></div>
 
+    <!-- Modals -->
     <div id="noInternetModal" class="overlay">
         <div class="dialog">
             <div class="dialog-close" onclick="closeDialog('noInternetModal')">X</div>
@@ -361,7 +726,7 @@
     <div id="errorModal" class="overlay">
         <div class="dialog">
             <div class="dialog-header">
-                ERROR
+                ERROR <span style="color:red; font-size:28px; margin-left:10px;">X</span>
                 <div class="dialog-close" onclick="closeDialog('errorModal')">X</div>
             </div>
             <div class="dialog-body">
